@@ -20,6 +20,7 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import TopBar from '../components/TopBar'
+import { GRADIENT_BG, GRADIENT_BG_ALT, GRAIN_NOISE } from '../lib/theme'
 import { GRID_MATRIX, MoodTier, SocialWillingnessTier, DEMO_SCENARIOS, initSnapshots, type DashboardState } from '../engine/GodModeBridge'
 import type { Snapshot } from '../engine/GodModeBridge'
 
@@ -58,22 +59,9 @@ const GRID_ROSE = [244, 194, 202] as const // 玫瑰粉 #F4C2CA
 const GRID_MOON = [214, 236, 240] as const // 月白   #D6ECF0
 
 /**
- * 当前象限面板的背景:岫烟青 → 霜纨白,上下垂直渐变。
- * 两端都带轻微旋转(174°/186°),避免纯 180° 的机械感,过渡更弥散。
- * 岫烟青是中等明度青(亮度 0.380),白字压上去只有 2.44:1,
- * 故该面板的文字一律用深色;slate-950 在整条渐变上最低仍有 8.26:1。
+ * 岫烟青 → 霜纨白,上下垂直渐变。多处面板共用(当前象限、协作记录等)。
+ * 定义见 src/lib/theme.ts —— 与 Agent 运作说明页共用同一套令牌。
  */
-const QUADRANT_BG = {
-  backgroundImage: 'linear-gradient(174deg, #00B7C7 0%, #FCF9E8 100%)',
-} as const
-
-/**
- * 极淡细密颗粒噪点,叠在渐变之上增加质感。
- * 用 inline SVG feTurbulence 生成,无需外部图片;baseFrequency 取大值保证颗粒细密,
- * opacity 压到 0.05 使其仅作纹理,不干扰文字可读性。
- */
-const QUADRANT_NOISE =
-  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E\")"
 
 function rgba(c: readonly [number, number, number] | readonly number[], alpha: number) {
   return `rgba(${c[0]}, ${c[1]}, ${c[2]}, ${alpha})`
@@ -581,12 +569,12 @@ export default function SystemOverviewPage() {
                         */}
                         <section
                           className="quadrant-transition relative overflow-hidden rounded-lg border border-white/25 p-6 text-slate-950"
-                          style={QUADRANT_BG}
+                          style={GRADIENT_BG}
                         >
                           {/* 颗粒层:纯装饰,不接收指针事件 */}
                           <div
                             className="pointer-events-none absolute inset-0"
-                            style={{ backgroundImage: QUADRANT_NOISE }}
+                            style={{ backgroundImage: GRAIN_NOISE }}
                             aria-hidden="true"
                           />
                           <div className="relative">
@@ -705,27 +693,49 @@ export default function SystemOverviewPage() {
                           })}
                         </section>
 
-                        <aside className="rounded-lg border border-slate-200 bg-slate-950 p-5 text-white">
-                          <div className="flex items-center justify-between gap-3">
-                            <div>
-                              <p className="text-sm font-bold text-sky-200">协作记录</p>
-                              <h3 className="mt-1 text-lg font-bold">最近接力</h3>
+                        <aside
+                          className="quadrant-transition relative overflow-hidden rounded-lg border border-white/25 p-5 text-slate-950"
+                          style={GRADIENT_BG_ALT}
+                        >
+                          <div
+                            className="pointer-events-none absolute inset-0"
+                            style={{ backgroundImage: GRAIN_NOISE }}
+                            aria-hidden="true"
+                          />
+                          <div className="relative">
+                            <div className="flex items-center justify-between gap-3">
+                              <div>
+                                <p className="text-sm font-bold text-slate-700">协作记录</p>
+                                <h3 className="mt-1 text-lg font-bold">最近接力</h3>
+                              </div>
+                              <span className="text-sm font-semibold text-slate-600">{thinkChain.length} 条</span>
                             </div>
-                            <span className="text-sm font-semibold text-slate-400">{thinkChain.length} 条</span>
-                          </div>
-                          <div className="mt-5 space-y-2">
-                            {thinkChain.length === 0 ? (
-                              <p className="rounded-lg border border-white/10 bg-white/[0.05] p-4 text-sm leading-6 text-slate-300">
-                                点击“自动推演”或“下一步”后，这里只显示关键 Agent 接力。
-                              </p>
-                            ) : (
-                              thinkChain.slice(-5).map((item, index) => (
-                                <div key={`${item.time}-${index}`} className="rounded-lg border border-white/10 bg-white/[0.05] p-3">
-                                  <p className="text-sm font-bold" style={{ color: item.color }}>{item.agent}</p>
-                                  <p className="mt-1 text-sm text-slate-300">{item.message}</p>
-                                </div>
-                              ))
-                            )}
+                            <div className="mt-5 space-y-2">
+                              {thinkChain.length === 0 ? (
+                                <p className="rounded-lg bg-white/55 p-4 text-sm leading-6 text-slate-700">
+                                  点击“自动推演”或“下一步”后，这里只显示关键 Agent 接力。
+                                </p>
+                              ) : (
+                                thinkChain.slice(-5).map((item, index) => (
+                                  <div key={`${item.time}-${index}`} className="rounded-lg bg-white/55 p-3">
+                                    {/*
+                                      Agent 名称不用 item.color:那些是为深色底选的中间调,
+                                      在浅色底上对比度只有 1.7~3.4:1。
+                                      改用色点保留身份标识,名称走深色文字。
+                                    */}
+                                    <p className="flex items-center gap-2 text-sm font-bold text-slate-950">
+                                      <span
+                                        className="inline-block h-2 w-2 flex-shrink-0 rounded-full"
+                                        style={{ backgroundColor: item.color }}
+                                        aria-hidden="true"
+                                      />
+                                      {item.agent}
+                                    </p>
+                                    <p className="mt-1 text-sm text-slate-700">{item.message}</p>
+                                  </div>
+                                ))
+                              )}
+                            </div>
                           </div>
                         </aside>
                       </div>

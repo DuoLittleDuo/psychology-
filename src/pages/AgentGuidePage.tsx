@@ -12,6 +12,7 @@ import {
   Sparkles,
   Watch,
 } from "lucide-react"
+import { GRADIENT_BG, GRAIN_NOISE } from "../lib/theme"
 
 const AGENT_STEPS = [
   {
@@ -55,45 +56,57 @@ export default function AgentGuidePage() {
   return (
     <div className="min-h-full bg-[linear-gradient(180deg,#f7fbff_0%,#f8f7ff_52%,#fff8f4_100%)]">
       <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-5 p-4 md:p-6">
-        <section className="overflow-hidden rounded-2xl border border-white/80 bg-slate-950 text-white shadow-[0_20px_60px_rgba(15,23,42,0.16)]">
-          <div className="grid gap-8 p-6 md:p-8 xl:grid-cols-[minmax(0,1fr)_360px] xl:items-center">
+        {/*
+          背景:岫烟青 → 霜纨白 上下垂直渐变 + 极淡颗粒噪点(令牌见 src/lib/theme.ts)。
+          该青为中等明度,白字压上去对比度不足,故原深色卡片的白字/浅灰字整体转为深色。
+        */}
+        <section
+          className="relative overflow-hidden rounded-2xl border border-white/25 text-slate-950 shadow-[0_20px_60px_rgba(15,23,42,0.16)]"
+          style={GRADIENT_BG}
+        >
+          <div
+            className="pointer-events-none absolute inset-0"
+            style={{ backgroundImage: GRAIN_NOISE }}
+            aria-hidden="true"
+          />
+          <div className="relative grid gap-8 p-6 md:p-8 xl:grid-cols-[minmax(0,1fr)_360px] xl:items-center">
             <div>
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/8 px-3 py-1 text-xs font-semibold text-cyan-200">
+              <div className="inline-flex items-center gap-2 rounded-full border border-slate-900/10 bg-white/45 px-3 py-1 text-xs font-semibold text-cyan-800">
                 <Sparkles className="h-3.5 w-3.5" />
                 Agent 名称：同频
               </div>
               <h1 className="mt-4 max-w-3xl text-3xl font-bold leading-tight md:text-4xl">
                 不是等你打开聊天窗口，而是先感知、再判断、最后由安全规则决定是否出现
               </h1>
-              <p className="mt-4 max-w-3xl text-sm leading-6 text-slate-300">
+              <p className="mt-4 max-w-3xl text-sm leading-6 text-slate-700">
                 同频由五个子 Agent 组成联邦。手表负责轻量采集与提醒，系统端负责记忆、规划和安全审查；
                 所有能力围绕一个目标：在用户需要时提供低打扰、可解释、不过度推断的帮助。
               </p>
               <div className="mt-6 flex flex-wrap gap-3">
                 <Link
                   to="/app/system-overview?section=overview"
-                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-cyan-500 px-5 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400"
+                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-cyan-700 px-5 text-sm font-semibold text-white transition hover:bg-cyan-800"
                 >
                   返回运行总览
                   <ArrowRight className="h-4 w-4" />
                 </Link>
                 <Link
                   to="/app/system-overview?section=architecture"
-                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/5 px-5 text-sm font-semibold text-white transition hover:bg-white/10"
+                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-slate-900/15 bg-white/40 px-5 text-sm font-semibold text-slate-800 transition hover:bg-white/60"
                 >
                   查看完整架构图
                 </Link>
               </div>
             </div>
 
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
+            <div className="rounded-2xl border border-slate-900/10 bg-white/45 p-5">
               <div className="flex items-center gap-3">
-                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-cyan-500/15 text-cyan-300">
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-cyan-700/15 text-cyan-800">
                   <Watch className="h-5 w-5" />
                 </div>
                 <div className="flex-1">
-                  <p className="text-xs font-semibold text-slate-400">当前业务闭环</p>
-                  <p className="mt-1 text-sm font-bold text-white">手表采集 → 跨端判断 → 安全审查 → 结果回传</p>
+                  <p className="text-xs font-semibold text-slate-600">当前业务闭环</p>
+                  <p className="mt-1 text-sm font-bold text-slate-950">手表采集 → 跨端判断 → 安全审查 → 结果回传</p>
                 </div>
               </div>
               <div className="mt-5 space-y-3">
@@ -226,9 +239,9 @@ export default function AgentGuidePage() {
 
 function GuideFact({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-start justify-between gap-4 border-b border-white/10 pb-3 last:border-b-0 last:pb-0">
-      <span className="text-xs text-slate-400">{label}</span>
-      <span className="max-w-[64%] text-right text-xs font-semibold leading-5 text-white">{value}</span>
+    <div className="flex items-start justify-between gap-4 border-b border-slate-900/10 pb-3 last:border-b-0 last:pb-0">
+      <span className="text-xs text-slate-600">{label}</span>
+      <span className="max-w-[64%] text-right text-xs font-semibold leading-5 text-slate-950">{value}</span>
     </div>
   )
 }
