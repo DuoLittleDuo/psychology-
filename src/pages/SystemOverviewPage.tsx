@@ -585,7 +585,7 @@ export default function SystemOverviewPage() {
                                 return (
                                   <div
                                     key={`${moodKey}-${socialKey}`}
-                                    className={`flex flex-col justify-between rounded-lg border p-4 transition ${
+                                    className={`flex flex-col justify-between rounded-2xl border p-4 transition ${
                                       active
                                         ? 'border-indigo-400 shadow-md ring-2 ring-indigo-100'
                                         : 'border-slate-200'
