@@ -75,8 +75,8 @@ const AGENTS: Agent[] = [
     colorLight: "#eff6ff",
     position: { x: 50, y: 58 },
     description:
-      "先通过九宫格完成秒级决策，再把持续变化升级为渐进任务链。安全判断拥有最终否决权。",
-    metrics: ["L1 情绪", "L2 规划", "安全否决"],
+      "先通过九宫格完成秒级决策，再把持续变化升级为渐进任务链。安全层独立常驻，危机时刻接管升级。",
+    metrics: ["L1 情绪", "L2 规划", "安全接管"],
   },
   {
     id: "execution",
