@@ -48,6 +48,27 @@ function cleanLabel(label: string) {
   return label.replace(/^[^A-Za-z0-9\u4e00-\u9fff]+/, '').trim()
 }
 
+/**
+ * L1 \u4e5d\u5bab\u683c\u914d\u8272:\u6e58\u4e91\u9ec4 \u2192 \u6674\u5ddd\u84dd \u7684\u5bf9\u89d2\u6e10\u53d8\u3002
+ * \u4e24\u8272\u5747\u5df2\u6de1\u5316,\u4fdd\u8bc1\u653e\u5728 bg-slate-50 \u9762\u677f\u4e0a\u80fd\u770b\u51fa\u8272\u5757,\u53c8\u4e0d\u538b\u8fc7\u524d\u666f\u6587\u5b57\u3002
+ */
+const GRID_YELLOW = [245, 231, 176] as const // \u6e58\u4e91\u9ec4(\u6de1\u5316)
+const GRID_BLUE = [207, 224, 234] as const   // \u6674\u5ddd\u84dd(\u6de1\u5316)
+
+function rgba(c: readonly [number, number, number] | readonly number[], alpha: number) {
+  return `rgba(${c[0]}, ${c[1]}, ${c[2]}, ${alpha})`
+}
+
+/**
+ * \u5355\u5143\u683c (rowIndex, colIndex) \u7684\u80cc\u666f:\u6bcf\u683c\u5185\u90e8\u90fd\u662f\u6e58\u4e91\u9ec4 \u2194 \u6674\u5ddd\u84dd\u7684\u53cc\u8272\u6e10\u53d8\u3002
+ * \u6e10\u53d8\u89d2\u5ea6\u6309\u683c\u5b50\u4f4d\u7f6e\u8f6e\u8f6c(30\u00b0 \u2192 330\u00b0),\u8ba9\u6bcf\u683c\u7684\u9ec4\u84dd\u671d\u5411\u90fd\u4e0d\u540c,\u4e5d\u683c\u4e0d\u96f7\u540c\u3002
+ * \u900f\u660e\u5ea6\u70d8\u7119\u8fdb rgba \u800c\u975e\u7528\u5143\u7d20 opacity,\u5426\u5219\u4f1a\u8fde\u5355\u5143\u683c\u5185\u7684\u6587\u5b57\u4e00\u8d77\u6de1\u5316\u3002
+ */
+function gridCellBackground(rowIndex: number, colIndex: number, alpha: number) {
+  const angle = 30 + ((rowIndex * 3 + colIndex) * 300) / 8
+  return `linear-gradient(${Math.round(angle)}deg, ${rgba(GRID_YELLOW, alpha)} 0%, ${rgba(GRID_BLUE, alpha)} 100%)`
+}
+
 interface SlideMeta {
   id: SlideId
   eyebrow: string
@@ -555,22 +576,27 @@ export default function SystemOverviewPage() {
 
                         <section className="rounded-lg border border-slate-200 bg-slate-50 p-5">
                           <div className="grid h-full min-h-[360px] grid-cols-3 gap-3">
-                            {(['high', 'medium', 'low'] as const).map((moodKey) => (
-                              (['low', 'medium', 'high'] as const).map((socialKey) => {
+                            {(['high', 'medium', 'low'] as const).map((moodKey, rowIndex) => (
+                              (['low', 'medium', 'high'] as const).map((socialKey, colIndex) => {
                                 const gridCell = GRID_MATRIX[moodKey][socialKey]
                                 const active = gridCell.quadrantNumber === cell.quadrantNumber
                                 return (
                                   <div
                                     key={`${moodKey}-${socialKey}`}
                                     className={`flex flex-col justify-between rounded-lg border p-4 transition ${
-                                      active ? 'border-indigo-400 bg-white shadow-md ring-2 ring-indigo-100' : 'border-slate-200 bg-white/70'
+                                      active
+                                        ? 'border-indigo-400 shadow-md ring-2 ring-indigo-100'
+                                        : 'border-slate-200'
                                     }`}
+                                    // 每格内部都是湘云黄 ↔ 晴川蓝的双色渐变;活动格不透明度更高,色更实
+                                    style={{ backgroundImage: gridCellBackground(rowIndex, colIndex, active ? 0.95 : 0.8) }}
                                   >
                                     <div className="flex items-center justify-between gap-2">
-                                      <span className={`text-xl font-black tabular-nums ${active ? 'text-indigo-700' : 'text-slate-300'}`}>{gridCell.quadrantNumber}</span>
+                                      {/* 底色变深后 slate-300 只有 1.2:1,压不住,提到 slate-500 */}
+                                      <span className={`text-xl font-black tabular-nums ${active ? 'text-indigo-700' : 'text-slate-500'}`}>{gridCell.quadrantNumber}</span>
                                       {active && <Radio className="h-4 w-4 text-indigo-600" />}
                                     </div>
-                                    <p className={`mt-4 text-xs font-bold leading-5 ${active ? 'text-slate-950' : 'text-slate-500'}`}>
+                                    <p className={`mt-4 text-xs font-bold leading-5 ${active ? 'text-slate-950' : 'text-slate-600'}`}>
                                       {cleanLabel(gridCell.description)}
                                     </p>
                                   </div>
