@@ -164,8 +164,8 @@ para(doc, '（一）团队队员基本信息', SZ_H3, True, None, 6)
 
 hdr = ['姓名', '学校全称', '院（系）全称', '专业全称', '年级', '毕业时间', '联系电话', '邮箱', '团队分工']
 members = [
-    ['邓子祥', '山东师范大学', '计算机与人工智能学院', '人工智能', '大二', '2028.6', '15656807075', '256043794@qq.com', '队长'],
-    ['邓希语', '山东师范大学', '计算机与人工智能学院', '计算机科学与技术（非师范）', '大一', '2029.6', '18721255866', '2015853236@qq.com', '队员'],
+    ['邓子祥', '山东师范大学', '计算机与人工智能学院', '人工智能', '大三', '2028.6', '15656807075', '256043794@qq.com', '队长'],
+    ['邓希语', '山东师范大学', '计算机与人工智能学院', '计算机科学与技术（非师范）', '大二', '2029.6', '18721255866', '2015853236@qq.com', '队员'],
 ]
 t2 = doc.add_table(rows=1, cols=len(hdr))
 t2.style = 'Table Grid'
@@ -217,10 +217,32 @@ doc.add_page_break()
 para(doc, '二、作品原创性声明', SZ_H1, True, None, 12)
 para(doc, '“同频” Same Wavelength 作品原创性声明', SZ_H2, True, None, 10)
 para(doc, '郑重声明：承诺本参赛队伍报名信息真实有效；呈交的参赛作品相关资料以及所完成的作品实物等相关成果，是本团队独立进行研究工作所取得的成果，除文中已经注明引用的内容外，本作品说明文档不包含任何其他个人或集体已经发表或撰写过的作品成果，不侵犯任何第三方的知识产权或其他权利。本声明的法律结果由本参赛队承担。', SZ_BODY, False, None, 14)
-para(doc, '参赛队员签名（团队全部成员）：', SZ_BODY, False, None, 18)
-para(doc, '日期：      年     月     日', SZ_BODY, False, None, 24)
-para(doc, '指导老师审核签名：', SZ_BODY, False, None, 18)
-para(doc, '日期：      年     月     日', SZ_BODY, False, None, 10)
+
+SIG_DIR = os.path.join(MAT, '签名')
+
+
+def add_signature(fname, width_cm, gap_before=2, gap_after=4):
+    """插入手写签名图（透明底），宽度按原比例缩放。"""
+    path = os.path.join(SIG_DIR, fname)
+    if not os.path.exists(path):
+        para(doc, '（签名待补）', SZ_BODY, False, None, gap_after)
+        return
+    from PIL import Image
+    with Image.open(path) as im:
+        w, h = im.size
+    p = doc.add_paragraph()
+    p.paragraph_format.space_before = Pt(gap_before)
+    p.paragraph_format.space_after = Pt(gap_after)
+    p.paragraph_format.line_spacing = 1.0
+    p.add_run().add_picture(path, width=Cm(width_cm))
+
+
+para(doc, '参赛队员签名（团队全部成员）：', SZ_BODY, False, None, 2)
+add_signature('签名-队员.png', 5.6)
+para(doc, '日期：  2026  年   9   月   29  日', SZ_BODY, False, WD_ALIGN_PARAGRAPH.RIGHT, 18)
+para(doc, '指导老师审核签名：', SZ_BODY, False, None, 2)
+add_signature('签名-教师.png', 3.4)
+para(doc, '日期：  2026  年   9   月   29  日', SZ_BODY, False, WD_ALIGN_PARAGRAPH.RIGHT, 10)
 
 doc.add_page_break()
 
