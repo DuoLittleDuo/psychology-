@@ -50,12 +50,30 @@ function cleanLabel(label: string) {
 
 /**
  * L1 九宫格配色:玫瑰粉 ↔ 月白。
- * 两色均取自传统色并做过淡化,保证放在 bg-slate-50 面板上能看出色块,又不压过前景文字。
- * 月白若取过淡(如 #EEF4F8)会与面板底色只差 8/255,等于没有背景,故取 #D6ECF0 ——
+ * 两色均取自传统色并做过淡化,保证放在渐变背景上能看出色块,又不压过前景文字。
+ * 月白若取过淡(如 #EEF4F8)会与底色几乎融为一体,等于没有背景,故取 #D6ECF0 ——
  * 传统月白本就偏青白,这一档既保留色相又保证可见度。
  */
 const GRID_ROSE = [244, 194, 202] as const // 玫瑰粉 #F4C2CA
 const GRID_MOON = [214, 236, 240] as const // 月白   #D6ECF0
+
+/**
+ * 当前象限面板的背景:岫烟青 → 霜纨白,上下垂直渐变。
+ * 两端都带轻微旋转(174°/186°),避免纯 180° 的机械感,过渡更弥散。
+ * 岫烟青是中等明度青(亮度 0.380),白字压上去只有 2.44:1,
+ * 故该面板的文字一律用深色;slate-950 在整条渐变上最低仍有 8.26:1。
+ */
+const QUADRANT_BG = {
+  backgroundImage: 'linear-gradient(174deg, #00B7C7 0%, #FCF9E8 100%)',
+} as const
+
+/**
+ * 极淡细密颗粒噪点,叠在渐变之上增加质感。
+ * 用 inline SVG feTurbulence 生成,无需外部图片;baseFrequency 取大值保证颗粒细密,
+ * opacity 压到 0.05 使其仅作纹理,不干扰文字可读性。
+ */
+const QUADRANT_NOISE =
+  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E\")"
 
 function rgba(c: readonly [number, number, number] | readonly number[], alpha: number) {
   return `rgba(${c[0]}, ${c[1]}, ${c[2]}, ${alpha})`
@@ -554,40 +572,44 @@ export default function SystemOverviewPage() {
                     {activeSlide.id === 'decision' && (
                       <div className="grid flex-1 gap-4 xl:grid-cols-[390px_minmax(0,1fr)]">
                         {/*
-                          青蓝 #005C79 → 沧浪 #B1D5C8 的完整渐变。
-                          两色明度差 6.8 倍(0.090 vs 0.611),若线性铺满整个面板,
-                          中段会出现白字、深字都不达标的死区。故把过渡带压在
-                          54%~74% —— 实测该区间正好落在「描述块底部(53%)」与
-                          「三张小卡顶部(65%)」之间的空隙,没有文字横跨,
-                          于是形成「上深下浅」两段式:上半用白字,下半用深字。
+                          背景换成 岫烟青 → 霜纨白 的上下垂直渐变 + 极淡颗粒噪点。
+                          与上一版(青蓝→沧浪)的区别:这两端都是浅色调,一种深色文字
+                          即可贯穿整条渐变,不需要再靠停靠点规避过渡死区 —— 因此
+                          这里是真正的平滑过渡,没有硬边界。
+                          岫烟青为中等明度青,白字只有 2.44:1,故文字统一转深色;
+                          slate-950 在整条渐变上最低仍有 8.26:1。
                         */}
                         <section
-                          className="quadrant-transition rounded-lg border border-white/10 p-6 text-white"
-                          style={{
-                            backgroundImage:
-                              'linear-gradient(180deg, #005C79 0%, #005C79 54%, #B1D5C8 74%, #B1D5C8 100%)',
-                          }}
+                          className="quadrant-transition relative overflow-hidden rounded-lg border border-white/25 p-6 text-slate-950"
+                          style={QUADRANT_BG}
                         >
-                          <p className="text-sm font-bold text-[#B1D5C8]">当前象限</p>
-                          <div className="mt-6 flex items-end gap-4">
-                              <span className="text-7xl font-black leading-none tabular-nums">{dashboard.quadrantNumber}</span>
-                            <div className="pb-2">
-                              <p className="text-lg font-bold">{dashboard.quadrantDescription}</p>
-                              <p className="mt-2 text-sm leading-6 text-[#B1D5C8]/80">{dashboard.primaryAction}</p>
-                            </div>
-                          </div>
-                          <div className="mt-8 grid grid-cols-3 gap-2">
-                            {[
-                              ['情绪', tierLabels[moodTier]],
-                              ['社交', tierLabels[socialTier]],
-                              ['风险', riskLabels[riskLevel]],
-                            ].map(([label, value]) => (
-                              // 小卡落在渐变浅端,叠白提亮后用深色字;深字在此处 11.5~15.8:1
-                              <div key={label} className="rounded-lg bg-white/45 p-3 backdrop-blur-sm">
-                                <p className="text-xs font-semibold text-slate-700">{label}</p>
-                                <p className="mt-1 text-base font-bold text-slate-950">{value}</p>
+                          {/* 颗粒层:纯装饰,不接收指针事件 */}
+                          <div
+                            className="pointer-events-none absolute inset-0"
+                            style={{ backgroundImage: QUADRANT_NOISE }}
+                            aria-hidden="true"
+                          />
+                          <div className="relative">
+                            <p className="text-sm font-bold text-slate-700">当前象限</p>
+                            <div className="mt-6 flex items-end gap-4">
+                                <span className="text-7xl font-black leading-none tabular-nums">{dashboard.quadrantNumber}</span>
+                              <div className="pb-2">
+                                <p className="text-lg font-bold">{dashboard.quadrantDescription}</p>
+                                <p className="mt-2 text-sm leading-6 text-slate-700">{dashboard.primaryAction}</p>
                               </div>
-                            ))}
+                            </div>
+                            <div className="mt-8 grid grid-cols-3 gap-2">
+                              {[
+                                ['情绪', tierLabels[moodTier]],
+                                ['社交', tierLabels[socialTier]],
+                                ['风险', riskLabels[riskLevel]],
+                              ].map(([label, value]) => (
+                                <div key={label} className="rounded-lg bg-white/40 p-3 backdrop-blur-sm">
+                                  <p className="text-xs font-semibold text-slate-700">{label}</p>
+                                  <p className="mt-1 text-base font-bold text-slate-950">{value}</p>
+                                </div>
+                              ))}
+                            </div>
                           </div>
                         </section>
 
