@@ -44,13 +44,13 @@ npm run dev      # 同时启动后端引擎 API(3001) 与前端面板(5173)
 ├── server/
 │   ├── engine-server.ts    后端引擎 API（Express）
 │   ├── start.js            前后端一键启动脚本
-│   └── engine/             ★ 六大 Agent 联邦核心引擎（TypeScript）
-│       ├── perception/     感知层：4 通道 + SnapshotBuilder
-│       ├── memory/         记忆层：三层记忆 + 巩固 + 召回
-│       ├── decision/       决策层：L1 九宫格 + L2 深度规划
-│       ├── execution/      执行层：卡片类型 + 设备类型
-│       ├── reflection/     反思层：质量评估 + 自动调优
-│       ├── safety/         安全层：四级危机响应 + 护栏 + 隐私
+│   └── engine/             ★ 五大 Agent 联邦核心引擎（TypeScript）
+│       ├── perception/     感知 Agent：4 通道 + SnapshotBuilder
+│       ├── memory/         记忆 Agent：三层记忆 + 巩固 + 召回
+│       ├── decision/       决策 Agent：L1 九宫格 + L2 深度规划
+│       ├── safety/         安全 Agent：四级危机响应 + 护栏 + 隐私
+│       ├── execution/      执行 Agent：卡片类型 + 设备类型
+│       ├── reflection/     持续学习闭环：质量评估 + 自动调优
 │       ├── god_mode/       上帝模式：模拟数据 + 状态覆盖 + 基准测试
 │       └── tests/          测试与演示脚本
 │
@@ -59,7 +59,7 @@ npm run dev      # 同时启动后端引擎 API(3001) 与前端面板(5173)
 └── public/                 静态资源
 ```
 
-> **关于 `server/engine/`**：六大 Agent 的核心引擎源码已内联在本仓库中，**无需任何外部路径即可运行**。
+> **关于 `server/engine/`**：五大 Agent 的核心引擎源码已内联在本仓库中，**无需任何外部路径即可运行**。
 
 ---
 

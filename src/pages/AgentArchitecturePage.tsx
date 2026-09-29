@@ -440,7 +440,7 @@ export default function AgentArchitecturePage() {
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="text-[10px] font-black uppercase tracking-[0.16em] text-blue-600">Continuous Learning</p>
-            <h3 className="mt-1 text-base font-black text-slate-950">反思 Agent：持续自优化闭环</h3>
+            <h3 className="mt-1 text-base font-black text-slate-950">持续学习闭环：反思机制</h3>
           </div>
           <span className="text-[10px] font-semibold text-slate-400">每轮任务结束后自动触发</span>
         </div>

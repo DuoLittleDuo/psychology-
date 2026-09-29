@@ -140,7 +140,7 @@ const SLIDES: SlideMeta[] = [
     id: 'agents',
     eyebrow: '04 / AGENTS',
     title: 'Agent 协作链',
-    relation: '六个 Agent 接力',
+    relation: '五个 Agent 接力',
     lead: '每个 Agent 只负责自己的判断，最后由安全和执行层收口。',
     icon: BrainIcon,
     tone: {
@@ -185,14 +185,13 @@ const AGENT_PIPELINE = [
   { name: '决策 Agent', icon: 'target', role: '选择动作', color: '#0f766e' },
   { name: '安全 Agent', icon: 'shield', role: '守住边界', color: '#d97706' },
   { name: '执行 Agent', icon: 'smartphone', role: '低打扰触达', color: '#0284c7' },
-  { name: '反思 Agent', icon: 'sparkles', role: '回收效果', color: '#be123c' },
 ]
 
 const DEMO_STAGES = [
   { slideId: 'state', mood: 0.68, social: 0.60, agent: '模拟器', message: '载入初始状态与约束条件' },
   { slideId: 'decision', mood: 0.52, social: 0.48, agent: '决策 Agent', message: '状态变化触发 L1 九宫格重新判断' },
   { slideId: 'memory', mood: 0.40, social: 0.38, agent: '记忆 Agent', message: '召回近期趋势与长期偏好，触发 L2 深度规划' },
-  { slideId: 'agents', mood: 0.36, social: 0.34, agent: 'Agent 联邦', message: '六个 Agent 开始协作' },
+  { slideId: 'agents', mood: 0.36, social: 0.34, agent: 'Agent 联邦', message: '五个 Agent 开始协作' },
   { slideId: 'delivery', mood: 0.34, social: 0.38, agent: '执行 Agent', message: '生成关怀卡片并同步到多端' },
 ]
 

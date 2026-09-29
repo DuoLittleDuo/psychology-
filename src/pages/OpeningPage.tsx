@@ -313,7 +313,7 @@ function AgentSection({ ready }: { ready: boolean }) {
         </p>
       </motion.div>
 
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
         {AGENTS.map((agent, index) => (
           <AgentCard key={agent.name} agent={agent} index={index} ready={ready} />
         ))}
