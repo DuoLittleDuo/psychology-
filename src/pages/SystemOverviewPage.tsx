@@ -553,13 +553,13 @@ export default function SystemOverviewPage() {
 
                     {activeSlide.id === 'decision' && (
                       <div className="grid flex-1 gap-4 xl:grid-cols-[390px_minmax(0,1fr)]">
-                        <section className="quadrant-transition rounded-lg border border-slate-200 bg-slate-950 p-6 text-white">
-                          <p className="text-sm font-bold text-cyan-200">当前象限</p>
+                        <section className="quadrant-transition rounded-lg border border-white/10 bg-[#005C79] p-6 text-white">
+                          <p className="text-sm font-bold text-[#B1D5C8]">当前象限</p>
                           <div className="mt-6 flex items-end gap-4">
                               <span className="text-7xl font-black leading-none tabular-nums">{dashboard.quadrantNumber}</span>
                             <div className="pb-2">
                               <p className="text-lg font-bold">{dashboard.quadrantDescription}</p>
-                              <p className="mt-2 text-sm leading-6 text-slate-300">{dashboard.primaryAction}</p>
+                              <p className="mt-2 text-sm leading-6 text-[#B1D5C8]/80">{dashboard.primaryAction}</p>
                             </div>
                           </div>
                           <div className="mt-8 grid grid-cols-3 gap-2">
@@ -568,9 +568,10 @@ export default function SystemOverviewPage() {
                               ['社交', tierLabels[socialTier]],
                               ['风险', riskLabels[riskLevel]],
                             ].map(([label, value]) => (
-                              <div key={label} className="rounded-lg border border-white/10 bg-white/[0.08] p-3">
-                                <p className="text-xs text-slate-400">{label}</p>
-                                <p className="mt-1 text-base font-bold">{value}</p>
+                              // 沧浪色小卡:底为浅青绿,故文字必须用深色(深字 12.7:1)
+                              <div key={label} className="rounded-lg bg-[#B1D5C8] p-3">
+                                <p className="text-xs font-semibold text-slate-700">{label}</p>
+                                <p className="mt-1 text-base font-bold text-slate-950">{value}</p>
                               </div>
                             ))}
                           </div>
