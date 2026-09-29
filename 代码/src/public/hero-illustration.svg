@@ -1,0 +1,25 @@
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400' fill='none'>
+  <circle cx='200' cy='200' r='190' fill='#c4b5fd' opacity='0.15'/>
+  <defs>
+    <linearGradient id='bg' x1='0' y1='0' x2='0' y2='1'>
+      <stop offset='0%25' stop-color='#7c3aed'/>
+      <stop offset='100%25' stop-color='#6366f1'/>
+    </linearGradient>
+    <linearGradient id='glow' x1='0' y1='0' x2='1' y2='1'>
+      <stop offset='0%25' stop-color='#a78bfa' stop-opacity='0.5'/>
+      <stop offset='100%25' stop-color='#c4b5fd' stop-opacity='0.1'/>
+    </linearGradient>
+  </defs>
+  <ellipse cx='200' cy='280' rx='110' ry='25' fill='url(#glow)'/>
+  <path d='M180 240 C175 210,170 190,175 175 L225 175 C230 190,225 210,220 240 Z' fill='url(#bg)' opacity='0.85'/>
+  <circle cx='200' cy='152' r='30' fill='url(#bg)' opacity='0.9'/>
+  <path d='M175 175 C160 185,148 200,150 215 C152 210,160 200,175 195' fill='url(#bg)' opacity='0.7'/>
+  <path d='M225 175 C240 185,252 200,250 215 C248 210,240 200,225 195' fill='url(#bg)' opacity='0.7'/>
+  <path d='M180 240 C165 255,145 270,130 275 C140 272,160 260,175 248' fill='url(#bg)' opacity='0.7'/>
+  <path d='M220 240 C235 255,255 270,270 275 C260 272,240 260,225 248' fill='url(#bg)' opacity='0.7'/>
+  <circle cx='140' cy='130' r='3' fill='#a78bfa' opacity='0.6'><animate attributeName='opacity' values='0.3;0.8;0.3' dur='3s' repeatCount='indefinite'/></circle>
+  <circle cx='260' cy='110' r='2.5' fill='#c4b5fd' opacity='0.5'><animate attributeName='opacity' values='0.5;0.2;0.5' dur='2.5s' repeatCount='indefinite'/></circle>
+  <circle cx='160' cy='95' r='2' fill='#8b5cf6' opacity='0.4'><animate attributeName='opacity' values='0.2;0.7;0.2' dur='3.5s' repeatCount='indefinite'/></circle>
+  <circle cx='250' cy='160' r='2' fill='#a78bfa' opacity='0.4'><animate attributeName='opacity' values='0.6;0.2;0.6' dur='2.8s' repeatCount='indefinite'/></circle>
+  <circle cx='200' cy='195' r='78' fill='none' stroke='#a78bfa' stroke-width='1' opacity='0.3'><animate attributeName='r' values='78;85;78' dur='6s' repeatCount='indefinite'/><animate attributeName='opacity' values='0.3;0.15;0.3' dur='6s' repeatCount='indefinite'/></circle>
+</svg>

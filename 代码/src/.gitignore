@@ -1,0 +1,13 @@
+node_modules/
+dist/
+*.log
+*.tsbuildinfo
+.DS_Store
+.env
+.env.*
+%SystemDrive%/
+.agents/
+.claude/
+
+# Office 临时锁文件
+~$*

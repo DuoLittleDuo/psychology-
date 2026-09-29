@@ -1,0 +1,253 @@
+@import "tailwindcss";
+
+@theme {
+  --color-surface-900: #0a0a16;
+  --color-surface-800: #12122a;
+  --color-surface-700: #1e1e3a;
+  --color-accent-blue: #4da6ff;
+  --color-accent-green: #4dff88;
+  --color-accent-red: #ff4d4d;
+  --color-accent-orange: #ff8c42;
+  --color-accent-yellow: #ffcc4d;
+  --color-accent-purple: #b44dff;
+  --color-border-subtle: #2a2a4a;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+body {
+  font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  overflow: hidden;
+}
+
+/* === GSAP 动画基础 === */
+.gsap-fade-in {
+  opacity: 0;
+  transform: translateY(12px);
+}
+
+.gsap-scale-in {
+  opacity: 0;
+  transform: scale(0.92);
+}
+
+.gsap-slide-left {
+  opacity: 0;
+  transform: translateX(-20px);
+}
+
+.gsap-slide-right {
+  opacity: 0;
+  transform: translateX(20px);
+}
+
+/* === 3×3 九宫格脉冲 === */
+@keyframes quadrant-pulse {
+  0%, 100% { box-shadow: 0 0 12px rgba(77, 166, 255, 0.4), inset 0 0 12px rgba(77, 166, 255, 0.1); }
+  50% { box-shadow: 0 0 28px rgba(77, 166, 255, 0.8), inset 0 0 24px rgba(77, 166, 255, 0.2); }
+}
+
+@keyframes crisis-pulse {
+  0%, 100% { box-shadow: 0 0 16px rgba(255, 77, 77, 0.5), inset 0 0 16px rgba(255, 77, 77, 0.15); }
+  50% { box-shadow: 0 0 40px rgba(255, 77, 77, 0.9), inset 0 0 32px rgba(255, 77, 77, 0.3); }
+}
+
+@keyframes success-pulse {
+  0%, 100% { box-shadow: 0 0 10px rgba(77, 255, 136, 0.3), inset 0 0 10px rgba(77, 255, 136, 0.08); }
+  50% { box-shadow: 0 0 24px rgba(77, 255, 136, 0.6), inset 0 0 20px rgba(77, 255, 136, 0.15); }
+}
+
+.quadrant-active {
+  animation: quadrant-pulse 2.5s ease-in-out infinite;
+}
+
+.quadrant-crisis {
+  animation: crisis-pulse 1.2s ease-in-out infinite;
+}
+
+.quadrant-success {
+  animation: success-pulse 3s ease-in-out infinite;
+}
+
+/* === 手表心跳 === */
+@keyframes heartbeat {
+  0%, 100% { transform: scale(1); }
+  8% { transform: scale(1.15); }
+  16% { transform: scale(1); }
+  24% { transform: scale(1.1); }
+  32% { transform: scale(1); }
+}
+
+.heartbeat {
+  animation: heartbeat 1.5s ease-in-out infinite;
+}
+
+/* === 红色闪烁（危机） === */
+@keyframes red-flash {
+  0%, 100% { background-color: transparent; }
+  50% { background-color: rgba(255, 0, 0, 0.08); }
+}
+
+.crisis-flash {
+  animation: red-flash 0.6s ease-in-out 5;
+}
+
+/* === 滑动条自定义 === */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 3px;
+  outline: none;
+  background: var(--track-color, #e5e7eb);
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  cursor: pointer;
+  background: var(--thumb-color, #8b5cf6);
+  border: 2px solid rgba(255,255,255,0.5);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  transition: transform 0.15s ease;
+}
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.25);
+}
+
+/* === Shimmer (按钮背景滚动) === */
+@keyframes shimmer {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+
+.animate-shimmer {
+  animation: shimmer 3s linear infinite;
+}
+
+@keyframes journey-aura-breathe {
+  0%, 100% {
+    opacity: 0.36;
+    transform: translate3d(-1%, 0, 0) scale(0.98);
+  }
+  50% {
+    opacity: 0.58;
+    transform: translate3d(1%, 1%, 0) scale(1.03);
+  }
+}
+
+.journey-button {
+  isolation: isolate;
+}
+
+.journey-button__aura {
+  background:
+    radial-gradient(56% 105% at 16% 48%, rgba(45, 212, 191, 0.16), transparent 72%),
+    radial-gradient(58% 110% at 84% 58%, rgba(125, 211, 252, 0.13), transparent 74%);
+  filter: blur(16px);
+  transform: translateZ(0);
+  animation: journey-aura-breathe 7s ease-in-out infinite;
+  transition: opacity 300ms ease, filter 300ms ease;
+}
+
+.journey-button:hover .journey-button__aura {
+  opacity: 0.72;
+  filter: blur(18px);
+}
+
+.journey-button__skin {
+  background:
+    radial-gradient(64% 170% at 14% 120%, rgba(20, 184, 166, 0.10), transparent 68%),
+    radial-gradient(58% 155% at 86% -18%, rgba(56, 189, 248, 0.11), transparent 66%),
+    linear-gradient(180deg, rgba(15, 23, 42, 0.94), rgba(5, 31, 45, 0.92));
+}
+
+.journey-button__skin::before,
+.journey-button__skin::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.journey-button__skin::before {
+  background:
+    radial-gradient(34% 130% at 34% 118%, rgba(45, 212, 191, 0.11), transparent 78%),
+    radial-gradient(30% 130% at 70% -28%, rgba(186, 230, 253, 0.09), transparent 76%);
+}
+
+.journey-button__skin::after {
+  background: radial-gradient(128% 82% at 50% -38%, rgba(255, 255, 255, 0.12), transparent 54%);
+  mix-blend-mode: screen;
+}
+
+/* === Slide in from left === */
+@keyframes slide-in {
+  from { transform: translateX(-16px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+.animate-slide-in {
+  animation: slide-in 0.3s ease-out;
+}
+
+/* === Fade in up === */
+@keyframes fade-in-up {
+  from { transform: translateY(12px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.4s ease-out;
+}
+
+/* === Pulse glow (用于hover高亮) === */
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 8px rgba(77, 166, 255, 0.3); }
+  50% { box-shadow: 0 0 24px rgba(77, 166, 255, 0.6); }
+}
+
+.glow-pulse {
+  animation: glow-pulse 2s ease-in-out infinite;
+}
+
+/* === Glassmorphism utility === */
+.glass {
+  background: rgba(18, 18, 42, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* === Scan line (雷达扫描效果) === */
+@keyframes scan-line {
+  0% { top: 0%; opacity: 0; }
+  10% { opacity: 0.3; }
+  90% { opacity: 0.3; }
+  100% { top: 100%; opacity: 0; }
+}
+
+.scan-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #4da6ff80, transparent);
+  animation: scan-line 4s ease-in-out infinite;
+  pointer-events: none;
+}
