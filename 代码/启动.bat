@@ -19,7 +19,6 @@ if errorlevel 1 goto NO_NODE
 for /f "tokens=*" %%v in ('node -v 2^>nul') do set NODEVER=%%v
 echo  [1/4] Node.js 检测通过：!NODEVER!
 
-REM 主版本号需 ^>= 18
 set NODEMAJOR=!NODEVER:v=!
 for /f "tokens=1 delims=." %%a in ("!NODEMAJOR!") do set NODEMAJOR=%%a
 if !NODEMAJOR! LSS 18 goto OLD_NODE
@@ -28,21 +27,30 @@ REM ==================== 2. 定位项目目录 ====================
 if not exist "src\package.json" goto NO_PKG
 echo  [2/4] 项目目录：src\
 
-REM ==================== 3. 安装依赖 ====================
+REM ==================== 3. 校验依赖 ====================
+REM 依赖已随包提供，正常情况下 10 秒内即可校验完成。
+REM 之所以仍执行一次 npm install，是因为 node_modules 中含有平台专用的
+REM 原生二进制（esbuild / rollup / tailwind-oxide / lightningcss），
+REM 它们与本机平台绑定。若在 Mac / Linux 上运行，本步骤会自动补装
+REM 对应平台的二进制；若缺失或损坏，也会被自动修复。
 cd src
-if not exist "node_modules" goto DO_INSTALL
-if not exist "node_modules\vite" goto DO_INSTALL
-if not exist "node_modules\express" goto DO_INSTALL
-echo  [3/4] 依赖已就绪，跳过安装
-goto RUN
+if exist "node_modules\vite\package.json" goto QUICK_CHECK
 
-:DO_INSTALL
-echo  [3/4] 首次运行，正在安装依赖（约 1-3 分钟，请耐心等待）...
+echo  [3/4] 未检测到依赖，正在安装（约 1-3 分钟）...
 echo.
 call npm install --no-audit --no-fund
 if errorlevel 1 goto INSTALL_FAIL
 echo.
 echo  依赖安装完成
+goto RUN
+
+:QUICK_CHECK
+echo  [3/4] 校验依赖（约 10 秒）...
+call npm install --no-audit --no-fund >nul 2>&1
+if errorlevel 1 goto INSTALL_FAIL
+if not exist "node_modules\vite\package.json" goto INSTALL_FAIL
+if not exist "node_modules\express\package.json" goto INSTALL_FAIL
+echo  依赖就绪
 
 REM ==================== 4. 启动 ====================
 :RUN
@@ -58,7 +66,6 @@ echo.
 echo  ※ 关闭本窗口即可停止全部服务。
 echo.
 
-REM 交给 npm run dev：它会同时拉起后端引擎与前端界面
 call npm run dev
 
 echo.
@@ -79,8 +86,8 @@ echo   请先安装（任选其一）：
 echo     1. 官网下载： https://nodejs.org/    推荐下载 LTS 版本
 echo     2. 国内镜像： https://npmmirror.com/mirrors/node/
 echo.
-echo   安装后请关闭本窗口，再重新双击运行本脚本。
 echo   安装时保持默认选项即可（会自动加入 PATH）。
+echo   安装完成后，请关闭本窗口，再重新双击运行本脚本。
 echo.
 pause
 exit /b 1
@@ -118,7 +125,7 @@ exit /b 1
 :INSTALL_FAIL
 echo.
 echo  ============================================================
-echo   [错误] 依赖安装失败
+echo   [错误] 依赖校验 / 安装失败
 echo  ============================================================
 echo.
 echo   可能原因与解决办法：
