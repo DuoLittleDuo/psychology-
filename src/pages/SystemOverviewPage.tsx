@@ -53,7 +53,7 @@ function cleanLabel(label: string) {
  * \u4e24\u8272\u5747\u5df2\u6de1\u5316,\u4fdd\u8bc1\u653e\u5728 bg-slate-50 \u9762\u677f\u4e0a\u80fd\u770b\u51fa\u8272\u5757,\u53c8\u4e0d\u538b\u8fc7\u524d\u666f\u6587\u5b57\u3002
  */
 const GRID_YELLOW = [245, 231, 176] as const // \u6e58\u4e91\u9ec4(\u6de1\u5316)
-const GRID_BLUE = [207, 224, 234] as const   // \u6674\u5ddd\u84dd(\u6de1\u5316)
+const GRID_BLUE = [169, 201, 221] as const   // \u6674\u5ddd\u84dd(\u52a0\u6df1\u4e00\u6863,\u4ecd\u4fdd\u8bc1\u6587\u5b57\u8fbe WCAG AA)
 
 function rgba(c: readonly [number, number, number] | readonly number[], alpha: number) {
   return `rgba(${c[0]}, ${c[1]}, ${c[2]}, ${alpha})`
