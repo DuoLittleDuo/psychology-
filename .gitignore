@@ -8,3 +8,6 @@ dist/
 %SystemDrive%/
 .agents/
 .claude/
+
+# Office 临时锁文件
+~$*
