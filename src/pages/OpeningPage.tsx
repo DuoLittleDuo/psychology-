@@ -94,6 +94,106 @@ export default function OpeningPage() {
   )
 }
 
+/**
+ * 动态太阳:中心圆球脉动发光 + 12 道光线错峰呼吸 + 整体反方向缓转
+ * 纯 SVG + CSS,无外部依赖。颜色取自页面主色板。
+ */
+function DynamicSun() {
+  const rays = Array.from({ length: 12 }, (_, i) => i)
+  return (
+    <div className="sun-wrap relative h-full w-full">
+      <style>{`
+        @keyframes sun-spin { to { transform: rotate(360deg); } }
+        @keyframes sun-pulse {
+          0%, 100% { transform: scale(1); filter: drop-shadow(0 0 18px rgba(217, 119, 6, 0.45)); }
+          50%      { transform: scale(1.04); filter: drop-shadow(0 0 34px rgba(217, 119, 6, 0.7)); }
+        }
+        @keyframes sun-ray-pulse {
+          0%, 100% { opacity: 0.55; transform: scale(0.92); }
+          50%      { opacity: 1;    transform: scale(1.08); }
+        }
+        .sun-core {
+          animation: sun-pulse 3.6s ease-in-out infinite;
+          transform-origin: 50% 50%;
+        }
+        .sun-rays {
+          animation: sun-spin 28s linear infinite;
+          transform-origin: 50% 50%;
+        }
+        .sun-ray {
+          animation: sun-ray-pulse 2.4s ease-in-out infinite;
+          transform-origin: 50% 50%;
+          transform-box: fill-box;
+        }
+      `}</style>
+      <svg
+        viewBox="0 0 200 200"
+        className="h-full w-full overflow-visible drop-shadow-[0_28px_45px_rgba(15,23,42,0.16)]"
+        aria-label="同频动态太阳"
+      >
+        <defs>
+          <radialGradient id="sun-core-grad" cx="50%" cy="50%" r="50%">
+            <stop offset="0%"   stopColor="#fff7ed" />
+            <stop offset="55%"  stopColor="#fbbf24" />
+            <stop offset="100%" stopColor="#d97706" />
+          </radialGradient>
+          <radialGradient id="sun-halo" cx="50%" cy="50%" r="50%">
+            <stop offset="0%"   stopColor="#fbbf24" stopOpacity="0.35" />
+            <stop offset="70%"  stopColor="#d97706" stopOpacity="0.05" />
+            <stop offset="100%" stopColor="#d97706" stopOpacity="0" />
+          </radialGradient>
+          <linearGradient id="sun-ray-grad" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%"   stopColor="#f59e0b" />
+            <stop offset="100%" stopColor="#0891b2" />
+          </linearGradient>
+        </defs>
+
+        {/* 外层光晕 */}
+        <circle cx="100" cy="100" r="95" fill="url(#sun-halo)" />
+
+        {/* 12 道光线(整体旋转) */}
+        <g className="sun-rays">
+          {rays.map((i) => {
+            const angle = (360 / rays.length) * i
+            const delay = (i * 0.2).toFixed(2)
+            return (
+              <rect
+                key={i}
+                className="sun-ray"
+                x="97"
+                y="14"
+                width="6"
+                height="22"
+                rx="3"
+                fill="url(#sun-ray-grad)"
+                style={{
+                  transformOrigin: "100px 100px",
+                  transform: `rotate(${angle}deg) translateY(-12px)`,
+                  animationDelay: `${delay}s`,
+                }}
+              />
+            )
+          })}
+        </g>
+
+        {/* 中心球体(脉动) */}
+        <g className="sun-core">
+          <circle cx="100" cy="100" r="42" fill="url(#sun-core-grad)" />
+          {/* 高光 */}
+          <ellipse
+            cx="86"
+            cy="84"
+            rx="14"
+            ry="9"
+            fill="#fff7ed"
+            opacity="0.55"
+          />
+        </g>
+      </svg>
+    </div>
+  )
+}
+
 function Hero({ ready, onEnter }: { ready: boolean; onEnter: () => void }) {
   return (
     <section className="relative z-10 mx-auto flex min-h-[92vh] w-full max-w-6xl flex-col items-center px-6 pb-10 pt-14 text-center md:pt-20">
@@ -103,7 +203,7 @@ function Hero({ ready, onEnter }: { ready: boolean; onEnter: () => void }) {
         animate={ready ? { opacity: 1, scale: 1 } : {}}
         transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
       >
-        <img src="/hero-illustration.svg" alt="同频心理陪伴" className="h-full w-full object-contain drop-shadow-[0_28px_45px_rgba(15,23,42,0.16)]" />
+        <DynamicSun />
       </motion.div>
 
       <motion.h1
