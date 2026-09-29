@@ -95,99 +95,117 @@ export default function OpeningPage() {
 }
 
 /**
- * 动态太阳:中心圆球脉动发光 + 12 道光线错峰呼吸 + 整体反方向缓转
- * 纯 SVG + CSS,无外部依赖。颜色取自页面主色板。
+ * 动态太阳
+ *
+ * 分层:外层光晕 → 旋转光线 → 中心球体
+ *
+ * 关键点:每道光线的角度用 SVG <g transform="rotate(a 100 100)"> 固定,
+ * CSS 动画只改 opacity。若把角度写在 CSS transform 上,会被动画的
+ * transform 覆盖,导致所有光线叠在同一位置。
  */
 function DynamicSun() {
-  const rays = Array.from({ length: 12 }, (_, i) => i)
+  const RAY_COUNT = 16
+
   return (
-    <div className="sun-wrap relative h-full w-full">
+    <div className="relative h-full w-full">
       <style>{`
         @keyframes sun-spin { to { transform: rotate(360deg); } }
-        @keyframes sun-pulse {
-          0%, 100% { transform: scale(1); filter: drop-shadow(0 0 18px rgba(217, 119, 6, 0.45)); }
-          50%      { transform: scale(1.04); filter: drop-shadow(0 0 34px rgba(217, 119, 6, 0.7)); }
+        @keyframes sun-breathe {
+          0%, 100% { transform: scale(0.95); }
+          50%      { transform: scale(1.06); }
         }
-        @keyframes sun-ray-pulse {
-          0%, 100% { opacity: 0.55; transform: scale(0.92); }
-          50%      { opacity: 1;    transform: scale(1.08); }
+        @keyframes sun-halo {
+          0%, 100% { transform: scale(0.88); opacity: 0.42; }
+          50%      { transform: scale(1.14); opacity: 0.85; }
         }
-        .sun-core {
-          animation: sun-pulse 3.6s ease-in-out infinite;
-          transform-origin: 50% 50%;
+        @keyframes sun-ray {
+          0%, 100% { opacity: 0.32; }
+          50%      { opacity: 1; }
         }
-        .sun-rays {
-          animation: sun-spin 28s linear infinite;
-          transform-origin: 50% 50%;
+        .sun-spin {
+          animation: sun-spin 36s linear infinite;
+          transform-box: view-box;
+          transform-origin: 100px 100px;
         }
-        .sun-ray {
-          animation: sun-ray-pulse 2.4s ease-in-out infinite;
-          transform-origin: 50% 50%;
-          transform-box: fill-box;
+        .sun-breathe {
+          animation: sun-breathe 4.2s ease-in-out infinite;
+          transform-box: view-box;
+          transform-origin: 100px 100px;
+        }
+        .sun-halo {
+          animation: sun-halo 5.6s ease-in-out infinite;
+          transform-box: view-box;
+          transform-origin: 100px 100px;
+        }
+        .sun-ray { animation: sun-ray 2.8s ease-in-out infinite; }
+        @media (prefers-reduced-motion: reduce) {
+          .sun-spin, .sun-breathe, .sun-halo, .sun-ray { animation: none; }
         }
       `}</style>
+
       <svg
         viewBox="0 0 200 200"
-        className="h-full w-full overflow-visible drop-shadow-[0_28px_45px_rgba(15,23,42,0.16)]"
+        className="h-full w-full overflow-visible"
+        role="img"
         aria-label="同频动态太阳"
       >
         <defs>
-          <radialGradient id="sun-core-grad" cx="50%" cy="50%" r="50%">
-            <stop offset="0%"   stopColor="#fff7ed" />
-            <stop offset="55%"  stopColor="#fbbf24" />
+          <radialGradient id="sun-core" cx="42%" cy="38%" r="68%">
+            <stop offset="0%"   stopColor="#fffbeb" />
+            <stop offset="42%"  stopColor="#fcd34d" />
+            <stop offset="78%"  stopColor="#f59e0b" />
             <stop offset="100%" stopColor="#d97706" />
           </radialGradient>
-          <radialGradient id="sun-halo" cx="50%" cy="50%" r="50%">
-            <stop offset="0%"   stopColor="#fbbf24" stopOpacity="0.35" />
-            <stop offset="70%"  stopColor="#d97706" stopOpacity="0.05" />
+          <radialGradient id="sun-halo-grad" cx="50%" cy="50%" r="50%">
+            <stop offset="0%"   stopColor="#fbbf24" stopOpacity="0.45" />
+            <stop offset="55%"  stopColor="#f59e0b" stopOpacity="0.12" />
             <stop offset="100%" stopColor="#d97706" stopOpacity="0" />
           </radialGradient>
-          <linearGradient id="sun-ray-grad" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%"   stopColor="#f59e0b" />
-            <stop offset="100%" stopColor="#0891b2" />
-          </linearGradient>
+          {/*
+            必须用 userSpaceOnUse:光线是竖直的 <line>,bounding box 宽度为 0,
+            默认的 objectBoundingBox 会让渐变退化、光线完全不渲染。
+            径向渐变在此还天然贴合放射状光线(由内向外渐显)。
+          */}
+          <radialGradient id="sun-ray-grad" gradientUnits="userSpaceOnUse" cx="100" cy="100" r="80">
+            <stop offset="45%"  stopColor="#f59e0b" stopOpacity="0" />
+            <stop offset="72%"  stopColor="#fbbf24" stopOpacity="0.9" />
+            <stop offset="100%" stopColor="#0891b2" stopOpacity="0.95" />
+          </radialGradient>
         </defs>
 
         {/* 外层光晕 */}
-        <circle cx="100" cy="100" r="95" fill="url(#sun-halo)" />
+        <circle className="sun-halo" cx="100" cy="100" r="94" fill="url(#sun-halo-grad)" />
 
-        {/* 12 道光线(整体旋转) */}
-        <g className="sun-rays">
-          {rays.map((i) => {
-            const angle = (360 / rays.length) * i
-            const delay = (i * 0.2).toFixed(2)
+        {/* 16 道光线:整体缓慢旋转,长短交替,各自错峰明灭 */}
+        <g className="sun-spin">
+          {Array.from({ length: RAY_COUNT }, (_, i) => {
+            const angle = (360 / RAY_COUNT) * i
+            const isLong = i % 2 === 0
             return (
-              <rect
-                key={i}
-                className="sun-ray"
-                x="97"
-                y="14"
-                width="6"
-                height="22"
-                rx="3"
-                fill="url(#sun-ray-grad)"
-                style={{
-                  transformOrigin: "100px 100px",
-                  transform: `rotate(${angle}deg) translateY(-12px)`,
-                  animationDelay: `${delay}s`,
-                }}
-              />
+              <g key={i} transform={`rotate(${angle} 100 100)`}>
+                <line
+                  className="sun-ray"
+                  x1="100"
+                  y1="52"
+                  x2="100"
+                  y2={isLong ? 26 : 40}
+                  stroke="url(#sun-ray-grad)"
+                  strokeWidth={isLong ? 5.5 : 3.5}
+                  strokeLinecap="round"
+                  style={{ animationDelay: `${(i * 0.17).toFixed(2)}s` }}
+                />
+              </g>
             )
           })}
         </g>
 
-        {/* 中心球体(脉动) */}
-        <g className="sun-core">
-          <circle cx="100" cy="100" r="42" fill="url(#sun-core-grad)" />
+        {/* 中心球体 */}
+        <g className="sun-breathe">
+          <circle cx="100" cy="100" r="44" fill="url(#sun-core)" />
+          {/* 边缘暖光 */}
+          <circle cx="100" cy="100" r="44" fill="none" stroke="#fde68a" strokeWidth="1.5" opacity="0.55" />
           {/* 高光 */}
-          <ellipse
-            cx="86"
-            cy="84"
-            rx="14"
-            ry="9"
-            fill="#fff7ed"
-            opacity="0.55"
-          />
+          <ellipse cx="86" cy="82" rx="16" ry="10" fill="#fffbeb" opacity="0.6" />
         </g>
       </svg>
     </div>
