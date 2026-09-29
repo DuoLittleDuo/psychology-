@@ -318,7 +318,7 @@ export default function SystemOverviewPage() {
 
   const memoryItems = [
     { id: 'm1', content: '偏好 1v1、低压陪伴', source: '长期记忆', relevance: 0.82 },
-    { id: 'm2', content: '21:00 后不主动推送', source: '硬性约束', relevance: 0.90 },
+    { id: 'm2', content: '23:00 后不主动推送', source: '硬性约束', relevance: 0.90 },
     { id: 'm3', content: '最近 3 天情绪下降', source: '短期趋势', relevance: 0.68 },
   ]
 
@@ -338,7 +338,7 @@ export default function SystemOverviewPage() {
       overridden: false,
     })),
     recalledMemories: memoryItems.map((memory) => ({ id: memory.id, content: memory.content, source: memory.source, relevance: memory.relevance })),
-    activeConstraints: nightMode ? ['夜间勿扰', '仅危机推送'] : solitude ? ['独处模式', '社交降级'] : ['21:00 后不推送'],
+    activeConstraints: nightMode ? ['夜间勿扰', '仅危机推送'] : solitude ? ['独处模式', '社交降级'] : ['23:00 后不推送'],
     l2TaskChain: cell.quadrantNumber <= 2 ? {
       name: '3 天渐进干预计划',
       progress: 'Day 1/3',
