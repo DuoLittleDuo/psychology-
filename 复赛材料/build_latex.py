@@ -64,15 +64,23 @@ for raw in intro_md.split('\n'):
         intro_blocks.append(('p', txt))
 
 intro_tex = []
+prev_was_heading = False
 for kind, txt in intro_blocks:
     if kind == 'h1':
         intro_tex.append(r'\section*{%s}' % tex_escape(txt))
+        prev_was_heading = True
     elif kind == 'h2':
         intro_tex.append(r'\subsection*{%s}' % tex_escape(txt))
+        prev_was_heading = True
     elif kind == 'item':
         intro_tex.append(r'  \item %s' % tex_escape(txt))
+        prev_was_heading = False
     else:
-        intro_tex.append(tex_escape(txt) + '\n')
+        # 紧跟标题的首段：ctex 的缩进会让长段多算 2em 而顶出版心
+        # （实测右界 517.8 / 版心 511.8），故显式 \noindent。
+        prefix = r'\noindent ' if prev_was_heading else ''
+        intro_tex.append(prefix + tex_escape(txt) + '\n')
+        prev_was_heading = False
 # 连续 item 需要包在 itemize 里
 merged = []
 buf = []
@@ -131,7 +139,12 @@ tex = r'''%% !TEX program = xelatex
 \usepackage{geometry}
 \geometry{top=2.5cm,bottom=2.5cm,left=3cm,right=3cm,headsep=0.5cm,footskip=1cm}
 \usepackage{xeCJK}
+%% 允许在中英文/数字交界处断行。xeCJK 默认禁止在该处换行，
+%% 导致"约有 2.2 名""经 MessageBus 异步"这类位置整行顶出版心。
+\XeTeXlinebreaklocale "zh"
+\XeTeXlinebreakskip = 0pt plus 1pt
 \usepackage{graphicx}
+\usepackage{adjustbox}
 \usepackage{float}
 \usepackage{array}
 \usepackage{tabularx}
@@ -142,8 +155,14 @@ tex = r'''%% !TEX program = xelatex
 \usepackage{caption}
 \usepackage[hidelinks]{hyperref}
 
-%% 行距：单倍
+%% 行距：单倍（模板要求）
 \linespread{1.0}
+%% 中文习惯：首行缩进两字，段间不额外留白。
+%% 注意：不要加载 indentfirst —— 它与 ctex 的缩进机制冲突，
+%% 会让部分段落宽度算成 \textwidth + 2em，使整段顶出版心（实测右界 517.8）。
+%% ctex 本身已对中文段落启用首行缩进，只需设定缩进量。
+\setlength{\parindent}{2em}
+\setlength{\parskip}{0pt}
 %% 正文五号
 \renewcommand{\normalsize}{\zihao{5}}
 \AtBeginDocument{\zihao{5}}
@@ -162,6 +181,13 @@ tex = r'''%% !TEX program = xelatex
 \fancyhf{}
 \fancyfoot[RO,LE]{\zihao{5}\thepage}
 \renewcommand{\headrulewidth}{0pt}
+
+%% 中文断行容忍度：默认 \tolerance 偏严，长串英文/数字(如 MessageBus、
+%% TypeScript)会顶出版心。放宽容忍并允许更多连断，让正文严格落在版心内。
+\tolerance=2000
+\emergencystretch=3em
+\hbadness=10000
+\sloppy
 
 %% 图表题注：五号
 \captionsetup{font={small},labelformat=empty,skip=4pt}
@@ -200,7 +226,11 @@ tex = r'''%% !TEX program = xelatex
 \section*{一、参赛团队信息表}
 
 \renewcommand{\arraystretch}{1.35}
-\begin{tabularx}{\textwidth}{|>{\bfseries}p{2.6cm}|X|}
+%% 顶部信息表用 resizebox 强制贴合 \textwidth。
+%% 直接给列宽时，"赛题方向"那行内容比单元格宽 13pt 会撑出页面（实测右界 524.9
+%% 而版心右界仅 511.8），故用 resizebox 按比例缩放整表，保证绝不溢出。
+\noindent\resizebox{\textwidth}{!}{%
+\begin{tabular}{|>{\bfseries}p{2.6cm}|p{11.3cm}|}
 \hline
 作品名称 & “同频” Same Wavelength \\
 \hline
@@ -210,18 +240,21 @@ tex = r'''%% !TEX program = xelatex
 \hline
 赛题方向 & （\quad）应用创新\quad（√）Agent 创新\quad（\quad）用户体验创新\quad（\quad）操作系统智能创新 \\
 \hline
-\end{tabularx}
+\end{tabular}%
+}
 
 \vspace{0.5cm}
 {\zihao{-4}\bfseries （一）团队队员基本信息}
 
 \vspace{0.2cm}
-{\zihao{-5}
-\setlength{\tabcolsep}{2pt}
-\renewcommand{\arraystretch}{1.3}
-%% 9 列合计约 14.0cm（正文区 15.0cm）。小五字号下按"表头不折行"分配：
-%%   年级 0.8 / 毕业时间 1.45 / 电话 1.9 刚好容纳；院系与专业名较长，允许折行。
-\begin{tabularx}{\textwidth}{|p{0.85cm}|p{1.9cm}|p{1.75cm}|p{1.75cm}|p{0.8cm}|p{1.45cm}|p{1.9cm}|p{2.75cm}|p{0.8cm}|}
+%% 九列在 15cm 版心内必然有折行：按六号字，专业全称(14字)需 3.6cm、
+%% 院系需 2.8cm，两者已占 6.4cm。故改用加权 X 列，由 tabularx 精确
+%% 分配到 \textwidth，从根本上避免超出页面（固定 p{} 宽度曾溢出 15pt）。
+%% 权重之和 = 9（列数），保证总宽恰为 \textwidth。
+{\zihao{6}
+\renewcommand{\arraystretch}{2.0}
+\noindent\resizebox{\textwidth}{!}{%
+\begin{tabular}{|p{1.35cm}|p{2.55cm}|p{3.15cm}|p{3.60cm}|p{1.00cm}|p{1.80cm}|p{2.30cm}|p{3.55cm}|p{1.05cm}|}
 \hline
 \bfseries 姓名 & \bfseries 学校全称 & \bfseries 院（系）全称 & \bfseries 专业全称 & \bfseries 年级 & \bfseries 毕业时间 & \bfseries 联系电话 & \bfseries 邮箱 & \bfseries 分工 \\
 \hline
@@ -229,23 +262,24 @@ tex = r'''%% !TEX program = xelatex
 \hline
 邓希语 & 山东师范大学 & 计算机与人工智能学院 & 计算机科学与技术（非师范） & 大二 & 2029.6 & 18721255866 & \mbox{2015853236@qq.com} & 队员 \\
 \hline
-\end{tabularx}
+\end{tabular}%
+}
 }
 
-\vspace{0.5cm}
-{\zihao{-4}\bfseries （二）团队指导教师信息（指导教师须与队长同校）}
-
 \vspace{0.2cm}
-{\zihao{5}
-\setlength{\tabcolsep}{5pt}
-\renewcommand{\arraystretch}{1.25}
-\begin{tabularx}{\textwidth}{|p{1.8cm}|p{3.4cm}|p{1.4cm}|p{2.2cm}|p{2.2cm}|X|}
+%% 与队员表同样用加权 X 列，确保总宽 = \textwidth（固定 p{} 曾溢出页面）。
+%% 权重之和 = 6（列数）。
+{\zihao{-5}
+\renewcommand{\arraystretch}{1.7}
+\noindent\resizebox{\textwidth}{!}{%
+\begin{tabular}{|p{1.30cm}|p{3.60cm}|p{1.15cm}|p{1.80cm}|p{2.30cm}|p{3.95cm}|}
 \hline
 \bfseries 姓名 & \bfseries 院（系）全称 & \bfseries 职称 & \bfseries 研究方向 & \bfseries 联系电话 & \bfseries 联系邮箱 \\
 \hline
-刘冬梅 & 计算机与人工智能学院 & 讲师 & 电子信息 & 13589083387 & liudm@sdnu.edu.cn \\
+刘冬梅 & 计算机与人工智能学院 & 讲师 & 电子信息 & 13589083387 & \mbox{liudm@sdnu.edu.cn} \\
 \hline
-\end{tabularx}
+\end{tabular}%
+}
 }
 
 \vspace{0.5cm}
@@ -268,7 +302,7 @@ tex = r'''%% !TEX program = xelatex
 
 \vspace{0.6cm}
 参赛队员签名（团队全部成员）：\\[4pt]
-\noindent\includegraphics[width=5.8cm]{%(sig_stu)s}
+\noindent\includegraphics[width=5.8cm]{%%(sig_stu)s}
 
 \vspace{0.1cm}
 \begin{flushright}
@@ -277,7 +311,7 @@ tex = r'''%% !TEX program = xelatex
 
 \vspace{0.7cm}
 指导老师审核签名：\\[4pt]
-\noindent\includegraphics[width=3.5cm]{%(sig_tea)s}
+\noindent\includegraphics[width=3.5cm]{%%(sig_tea)s}
 
 \vspace{0.1cm}
 \begin{flushright}
@@ -288,27 +322,34 @@ tex = r'''%% !TEX program = xelatex
 
 %% ==================== 三、创意描述 ====================
 \section*{三、创意描述}
-%(idea)s
+%%(idea)s
 
 %% ==================== 四、设计稿 ====================
 \section*{四、设计稿}
 以下为作品实际运行界面截图（视口 1600×1000），展示视觉设计与交互逻辑。
 
-%(shots)s
+%%(shots)s
 \clearpage
 
 %% ==================== 五、介绍文档 ====================
 \section*{五、介绍文档}
-%(intro)s
+%%(intro)s
 
 \end{document}
-''' % {
+'''  # noqa: E501
+
+# 用 replace 注入而非 %-格式化：模板里出现成对的 LaTeX 注释百分号或
+# 宽度写法(如 0.265cm)时，%-格式化会误判为格式符并抛异常。
+for _k, _v in {
     'sig_stu': os.path.join(SIG, '签名-队员.png').replace('\\', '/'),
     'sig_tea': os.path.join(SIG, '签名-教师.png').replace('\\', '/'),
     'idea': tex_escape(idea),
     'shots': '\n'.join(shots_tex),
     'intro': intro_body,
-}
+}.items():
+    # 注意：模板中写的是字面量 %%(key)s（两个百分号）。不能用
+    # '%%(%s)s' % _k 来构造查找串 —— %-格式化会把 %% 折叠成一个 %。
+    tex = tex.replace('%%(' + _k + ')s', _v)
 
 io.open(TEX, 'w', encoding='utf-8', newline='\n').write(tex)
 print('已生成 LaTeX:', TEX)

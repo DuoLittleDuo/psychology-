@@ -1,11 +1,16 @@
-% !TEX program = xelatex
-% 2026 中国高校计算机大赛—人工智能创意赛 · 鸿蒙赛道 · 作品说明文档
+%% !TEX program = xelatex
+%% 2026 中国高校计算机大赛—人工智能创意赛 · 鸿蒙赛道 · 作品说明文档
 \documentclass[fontset=windows,a4paper,UTF8]{ctexart}
 
 \usepackage{geometry}
 \geometry{top=2.5cm,bottom=2.5cm,left=3cm,right=3cm,headsep=0.5cm,footskip=1cm}
 \usepackage{xeCJK}
+%% 允许在中英文/数字交界处断行。xeCJK 默认禁止在该处换行，
+%% 导致"约有 2.2 名""经 MessageBus 异步"这类位置整行顶出版心。
+\XeTeXlinebreaklocale "zh"
+\XeTeXlinebreakskip = 0pt plus 1pt
 \usepackage{graphicx}
+\usepackage{adjustbox}
 \usepackage{float}
 \usepackage{array}
 \usepackage{tabularx}
@@ -16,13 +21,19 @@
 \usepackage{caption}
 \usepackage[hidelinks]{hyperref}
 
-% 行距：单倍
+%% 行距：单倍（模板要求）
 \linespread{1.0}
-% 正文五号
+%% 中文习惯：首行缩进两字，段间不额外留白。
+%% 注意：不要加载 indentfirst —— 它与 ctex 的缩进机制冲突，
+%% 会让部分段落宽度算成 \textwidth + 2em，使整段顶出版心（实测右界 517.8）。
+%% ctex 本身已对中文段落启用首行缩进，只需设定缩进量。
+\setlength{\parindent}{2em}
+\setlength{\parskip}{0pt}
+%% 正文五号
 \renewcommand{\normalsize}{\zihao{5}}
 \AtBeginDocument{\zihao{5}}
 
-% 各级标题字号（模板规定）
+%% 各级标题字号（模板规定）
 \titleformat{\section}{\zihao{3}\bfseries}{\thesection、}{0.3em}{}
 \titleformat{\subsection}{\zihao{4}\bfseries}{\thesubsection}{0.5em}{}
 \titleformat{\subsubsection}{\zihao{-4}\bfseries}{\thesubsubsection}{0.5em}{}
@@ -31,18 +42,25 @@
 \titlespacing*{\subsubsection}{0pt}{6pt}{4pt}
 \setcounter{secnumdepth}{0}
 
-% 页码：页面底端、外侧
+%% 页码：页面底端、外侧
 \pagestyle{fancy}
 \fancyhf{}
 \fancyfoot[RO,LE]{\zihao{5}\thepage}
 \renewcommand{\headrulewidth}{0pt}
 
-% 图表题注：五号
+%% 中文断行容忍度：默认 \tolerance 偏严，长串英文/数字(如 MessageBus、
+%% TypeScript)会顶出版心。放宽容忍并允许更多连断，让正文严格落在版心内。
+\tolerance=2000
+\emergencystretch=3em
+\hbadness=10000
+\sloppy
+
+%% 图表题注：五号
 \captionsetup{font={small},labelformat=empty,skip=4pt}
 
 \begin{document}
 
-% ==================== 封面 ====================
+%% ==================== 封面 ====================
 \begin{center}
   \vspace*{1.2cm}
   {\zihao{2}\bfseries 2026中国高校计算机大赛}\\[8pt]
@@ -58,7 +76,7 @@
 \end{center}
 \clearpage
 
-% ==================== 目录 ====================
+%% ==================== 目录 ====================
 \begin{center}{\zihao{3}\bfseries 目\quad 录}\end{center}
 \vspace{0.6cm}
 \begin{itemize}[leftmargin=2em,itemsep=8pt]
@@ -70,11 +88,15 @@
 \end{itemize}
 \clearpage
 
-% ==================== 一、参赛团队信息表 ====================
+%% ==================== 一、参赛团队信息表 ====================
 \section*{一、参赛团队信息表}
 
 \renewcommand{\arraystretch}{1.35}
-\begin{tabularx}{\textwidth}{|>{\bfseries}p{2.6cm}|X|}
+%% 顶部信息表用 resizebox 强制贴合 \textwidth。
+%% 直接给列宽时，"赛题方向"那行内容比单元格宽 13pt 会撑出页面（实测右界 524.9
+%% 而版心右界仅 511.8），故用 resizebox 按比例缩放整表，保证绝不溢出。
+\noindent\resizebox{\textwidth}{!}{%
+\begin{tabular}{|>{\bfseries}p{2.6cm}|p{11.3cm}|}
 \hline
 作品名称 & “同频” Same Wavelength \\
 \hline
@@ -84,18 +106,21 @@
 \hline
 赛题方向 & （\quad）应用创新\quad（√）Agent 创新\quad（\quad）用户体验创新\quad（\quad）操作系统智能创新 \\
 \hline
-\end{tabularx}
+\end{tabular}%
+}
 
 \vspace{0.5cm}
 {\zihao{-4}\bfseries （一）团队队员基本信息}
 
 \vspace{0.2cm}
-{\zihao{-5}
-\setlength{\tabcolsep}{2pt}
-\renewcommand{\arraystretch}{1.3}
-% 9 列合计约 14.0cm（正文区 15.0cm）。小五字号下按"表头不折行"分配：
-%   年级 0.8 / 毕业时间 1.45 / 电话 1.9 刚好容纳；院系与专业名较长，允许折行。
-\begin{tabularx}{\textwidth}{|p{0.85cm}|p{1.9cm}|p{1.75cm}|p{1.75cm}|p{0.8cm}|p{1.45cm}|p{1.9cm}|p{2.75cm}|p{0.8cm}|}
+%% 九列在 15cm 版心内必然有折行：按六号字，专业全称(14字)需 3.6cm、
+%% 院系需 2.8cm，两者已占 6.4cm。故改用加权 X 列，由 tabularx 精确
+%% 分配到 \textwidth，从根本上避免超出页面（固定 p{} 宽度曾溢出 15pt）。
+%% 权重之和 = 9（列数），保证总宽恰为 \textwidth。
+{\zihao{6}
+\renewcommand{\arraystretch}{2.0}
+\noindent\resizebox{\textwidth}{!}{%
+\begin{tabular}{|p{1.35cm}|p{2.55cm}|p{3.15cm}|p{3.60cm}|p{1.00cm}|p{1.80cm}|p{2.30cm}|p{3.55cm}|p{1.05cm}|}
 \hline
 \bfseries 姓名 & \bfseries 学校全称 & \bfseries 院（系）全称 & \bfseries 专业全称 & \bfseries 年级 & \bfseries 毕业时间 & \bfseries 联系电话 & \bfseries 邮箱 & \bfseries 分工 \\
 \hline
@@ -103,23 +128,24 @@
 \hline
 邓希语 & 山东师范大学 & 计算机与人工智能学院 & 计算机科学与技术（非师范） & 大二 & 2029.6 & 18721255866 & \mbox{2015853236@qq.com} & 队员 \\
 \hline
-\end{tabularx}
+\end{tabular}%
+}
 }
 
-\vspace{0.5cm}
-{\zihao{-4}\bfseries （二）团队指导教师信息（指导教师须与队长同校）}
-
 \vspace{0.2cm}
-{\zihao{5}
-\setlength{\tabcolsep}{5pt}
-\renewcommand{\arraystretch}{1.25}
-\begin{tabularx}{\textwidth}{|p{1.8cm}|p{3.4cm}|p{1.4cm}|p{2.2cm}|p{2.2cm}|X|}
+%% 与队员表同样用加权 X 列，确保总宽 = \textwidth（固定 p{} 曾溢出页面）。
+%% 权重之和 = 6（列数）。
+{\zihao{-5}
+\renewcommand{\arraystretch}{1.7}
+\noindent\resizebox{\textwidth}{!}{%
+\begin{tabular}{|p{1.30cm}|p{3.60cm}|p{1.15cm}|p{1.80cm}|p{2.30cm}|p{3.95cm}|}
 \hline
 \bfseries 姓名 & \bfseries 院（系）全称 & \bfseries 职称 & \bfseries 研究方向 & \bfseries 联系电话 & \bfseries 联系邮箱 \\
 \hline
-刘冬梅 & 计算机与人工智能学院 & 讲师 & 电子信息 & 13589083387 & liudm@sdnu.edu.cn \\
+刘冬梅 & 计算机与人工智能学院 & 讲师 & 电子信息 & 13589083387 & \mbox{liudm@sdnu.edu.cn} \\
 \hline
-\end{tabularx}
+\end{tabular}%
+}
 }
 
 \vspace{0.5cm}
@@ -134,7 +160,7 @@
 
 \clearpage
 
-% ==================== 二、作品原创性声明 ====================
+%% ==================== 二、作品原创性声明 ====================
 \section*{二、作品原创性声明}
 {\zihao{4}\bfseries “同频” Same Wavelength 作品原创性声明}\\[6pt]
 
@@ -160,11 +186,11 @@
 
 \clearpage
 
-% ==================== 三、创意描述 ====================
+%% ==================== 三、创意描述 ====================
 \section*{三、创意描述}
 「同频」把"该不该出现"前置为独立决策层：五大 Agent 联邦以情绪×社交意愿九宫格判定是否介入，L2 生成渐进任务链，安全层四级响应兜底，让鸿蒙端侧 AI 陪伴从"有问必答"转向"先学会克制"。
 
-% ==================== 四、设计稿 ====================
+%% ==================== 四、设计稿 ====================
 \section*{四、设计稿}
 以下为作品实际运行界面截图（视口 1600×1000），展示视觉设计与交互逻辑。
 
@@ -224,10 +250,10 @@
 
 \clearpage
 
-% ==================== 五、介绍文档 ====================
+%% ==================== 五、介绍文档 ====================
 \section*{五、介绍文档}
 \section*{一、创意背景}
-中国每十万人仅有约 2.2 名精神科医生，超七成有心理困扰者从未获得专业帮助。大学生并不缺少倾诉渠道，缺的是一个在正确时机、以正确强度出现的陪伴者。
+\noindent 中国每十万人仅有约 2.2 名精神科医生，超七成有心理困扰者从未获得专业帮助。大学生并不缺少倾诉渠道，缺的是一个在正确时机、以正确强度出现的陪伴者。
 
 现有 AI 心理陪伴产品多用"有问必答"的响应式范式：用户开口才回应，情绪一波动就推送。但心理支持恰恰相反——深夜一条不合时宜的"你还好吗"，可能比沉默更让人疲惫。痛点是陪伴的时机与强度失控。
 
@@ -235,7 +261,7 @@
 
 \section*{二、核心功能设计}
 \subsection*{2.1 五大 Agent 联邦}
-系统由五个独立运行、经 MessageBus 异步总线协同的 Agent 组成，遵循鸿蒙事件驱动范式而非轮询式单体应用：感知 Agent 采集信号并构建快照；记忆 Agent 负责三层记忆读写；决策 Agent 负责 L1 判定与 L2 规划；安全 Agent 常驻巡检；执行 Agent 负责卡片生成与跨端分发。
+\noindent 系统由五个独立运行、经 MessageBus 异步总线协同的 Agent 组成，遵循鸿蒙事件驱动范式而非轮询式单体应用：感知 Agent 采集信号并构建快照；记忆 Agent 负责三层记忆读写；决策 Agent 负责 L1 判定与 L2 规划；安全 Agent 常驻巡检；执行 Agent 负责卡片生成与跨端分发。
 
 \subsection*{2.2 感知层：四通道对接鸿蒙系统能力}
 \begin{itemize}[leftmargin=1.6em,itemsep=2pt,topsep=2pt]
@@ -247,25 +273,25 @@
 四路信号由 SnapshotBuilder 在端侧完成时序对齐与聚合，形成统一状态快照，原始数据不出设备。
 
 \subsection*{2.3 决策层：先判断要不要出现}
-L1 快速决策以情绪与社交意愿为两轴构成九宫格，将状态映射到 9 个象限，每格对应不同介入策略——从"危机关怀"到"深度匹配"，也包括"不打扰"。这是与常规产品的最大差异：默认动作是不介入，而非推送。
+\noindent L1 快速决策以情绪与社交意愿为两轴构成九宫格，将状态映射到 9 个象限，每格对应不同介入策略——从"危机关怀"到"深度匹配"，也包括"不打扰"。这是与常规产品的最大差异：默认动作是不介入，而非推送。
 
 L2 深度规划在 L1 判定需持续介入时触发，生成多步骤渐进任务链（如"共情对话→运动建议→效果评估"），按日追踪反馈并动态调整强度。
 
 \subsection*{2.4 记忆层：三层记忆体系}
-瞬时记忆承载当前对话与近时段生理数据；短期记忆追踪近期情绪与社交趋势；长期记忆沉淀人格偏好、硬性约束（如勿扰时段）与有效干预方案。三层区分使系统能分辨"临时波动"与"长期性格"。记忆只补充背景，不替代对当下的判断。
+\noindent 瞬时记忆承载当前对话与近时段生理数据；短期记忆追踪近期情绪与社交趋势；长期记忆沉淀人格偏好、硬性约束（如勿扰时段）与有效干预方案。三层区分使系统能分辨"临时波动"与"长期性格"。记忆只补充背景，不替代对当下的判断。
 
 \subsection*{2.5 安全层：常驻巡检与四级响应}
-安全 Agent 独立常驻，而非对话前置的被动过滤：对话护栏识别危机表达并按风险分级；推送预算限制单位时间主动触达，超限自动拦截；四级危机响应依次为延长陪伴→资源引导→征询授权→长期关怀。危机关键词命中时安全层接管，状态实时反映在运行总览中。
+\noindent 安全 Agent 独立常驻，而非对话前置的被动过滤：对话护栏识别危机表达并按风险分级；推送预算限制单位时间主动触达，超限自动拦截；四级危机响应依次为延长陪伴→资源引导→征询授权→长期关怀。危机关键词命中时安全层接管，状态实时反映在运行总览中。
 
 \section*{三、实现情况}
-核心引擎以 TypeScript 实现，51 个源文件约 12,800 行；可视化面板基于 React，30 个文件约 8,300 行。
+\noindent 核心引擎以 TypeScript 实现，51 个源文件约 12,800 行；可视化面板基于 React，30 个文件约 8,300 行。
 
 已实现感知四通道、三层记忆与巩固召回、L1 九宫格与 L2 深度规划、四级危机响应、对话护栏与推送预算、四种预设模拟场景与仿真基准，以及上帝模式控制台。引擎与前端均不依赖特定硬件，本地一条命令即可运行。
 
 鸿蒙原生能力（Health Kit、UsageStats、端侧 NLU、负一屏卡片、分布式软总线）目前已按系统 API 完成接口层对接与数据结构设计，ArkTS/ArkUI 迁移为下一阶段工作。
 
 \section*{四、市场前景}
-全球数字心理健康市场持续增长，国内高校心理咨询资源长期供不应求，为低门槛、低打扰的数字化陪伴留出空间。
+\noindent 全球数字心理健康市场持续增长，国内高校心理咨询资源长期供不应求，为低门槛、低打扰的数字化陪伴留出空间。
 
 「同频」的三重差异：决策前置（先判断是否介入，天然低打扰）、端侧隐私（数据不出设备）、多端协同（手表轻提醒、手机承接细节）。
 
