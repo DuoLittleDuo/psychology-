@@ -263,7 +263,7 @@ function Hero({ ready, onEnter }: { ready: boolean; onEnter: () => void }) {
         animate={ready ? { opacity: 1, y: 0 } : {}}
         transition={{ duration: 0.5, delay: 0.72 }}
       >
-        先读懂你的心情，再帮你找到同频的人。
+        先读懂你的心情，再成为陪伴你的人。
       </motion.p>
 
       <motion.button
