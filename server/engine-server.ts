@@ -54,52 +54,52 @@ let engineReady = false
 async function initEngine() {
   if (engineReady) return
 
-  // 从 ../src/ 导入（相对于 dashboard/server/）
-  const decisionMod = await import('../../src/decision/DecisionAgent.js')
+  // 引擎源码内联在 server/engine/,本仓库自包含,无需外部路径
+  const decisionMod = await import('./engine/decision/DecisionAgent.js')
   DecisionAgent = decisionMod.DecisionAgent
 
-  const safetyMod = await import('../../src/safety/SafetyAgent.js')
+  const safetyMod = await import('./engine/safety/SafetyAgent.js')
   SafetyAgent = safetyMod.SafetyAgent
 
-  const memoryMod = await import('../../src/memory/MemoryAgent.js')
+  const memoryMod = await import('./engine/memory/MemoryAgent.js')
   MemoryAgent = memoryMod.MemoryAgent
 
-  const mockMod = await import('../../src/god_mode/MockDataGenerator.js')
+  const mockMod = await import('./engine/god_mode/MockDataGenerator.js')
   MockDataGenerator = mockMod.MockDataGenerator
 
-  const godMod = await import('../../src/god_mode/GodModeController.js')
+  const godMod = await import('./engine/god_mode/GodModeController.js')
   GodModeController = godMod.GodModeController
 
-  const benchMod = await import('../../src/god_mode/SimulationBenchmark.js')
+  const benchMod = await import('./engine/god_mode/SimulationBenchmark.js')
   SimulationBenchmark = benchMod.SimulationBenchmark
 
-  const overrideMod = await import('../../src/god_mode/StateOverrideEngine.js')
+  const overrideMod = await import('./engine/god_mode/StateOverrideEngine.js')
   StateOverrideEngine = overrideMod.StateOverrideEngine
 
-  const gridMod = await import('../../src/decision/types/DecisionTypes.js')
+  const gridMod = await import('./engine/decision/types/DecisionTypes.js')
   GRID_MATRIX = gridMod.GRID_MATRIX
   MoodTier = gridMod.MoodTier
   SocialWillingnessTier = gridMod.SocialWillingnessTier
 
-  const scenarioMod = await import('../../src/god_mode/types/GodModeTypes.js')
+  const scenarioMod = await import('./engine/god_mode/types/GodModeTypes.js')
   DEMO_SCENARIOS = scenarioMod.DEMO_SCENARIOS
 
-  const configMod = await import('../../src/core/Config.js')
+  const configMod = await import('./engine/core/Config.js')
   CrisisLevel = configMod.CrisisLevel
 
-  const guardMod = await import('../../src/safety/DialogueGuard.js')
+  const guardMod = await import('./engine/safety/DialogueGuard.js')
   DialogueGuard = guardMod.DialogueGuard
 
-  const budgetMod = await import('../../src/safety/PushBudgetGuard.js')
+  const budgetMod = await import('./engine/safety/PushBudgetGuard.js')
   PushBudgetGuard = budgetMod.PushBudgetGuard
 
-  const crisisMod = await import('../../src/safety/CrisisEscalation.js')
+  const crisisMod = await import('./engine/safety/CrisisEscalation.js')
   CrisisEscalationManager = crisisMod.CrisisEscalationManager
 
-  const recallMod = await import('../../src/memory/MemoryRecall.js')
+  const recallMod = await import('./engine/memory/MemoryRecall.js')
   MemoryRecallEngine = recallMod.MemoryRecallEngine
 
-  const consolidMod = await import('../../src/memory/MemoryConsolidation.js')
+  const consolidMod = await import('./engine/memory/MemoryConsolidation.js')
   MemoryConsolidationEngine = consolidMod.MemoryConsolidationEngine
 
   // 初始化所有引擎实例
