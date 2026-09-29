@@ -224,12 +224,21 @@ function Hero({ ready, onEnter }: { ready: boolean; onEnter: () => void }) {
         <DynamicSun />
       </motion.div>
 
+      {/*
+        这行字用 background-clip:text 做渐变填充,渐变只画在 h1 的盒子范围内。
+        中文回退字体(微软雅黑)没有真正的斜体字形,font-style:italic 会让浏览器
+        合成倾斜:字形墨迹整体右探,但 advance 宽度不变(实测「频」盒宽 192px、
+        墨迹右边界达 228px,超出 36px)。超出盒子的部分背后没有渐变 → 透明 → 被裁掉。
+        故必须用 padding 把盒子撑到字形之外;斜体本身的视觉倾斜保持不变。
+      */}
       <motion.h1
         className="font-black italic leading-none tracking-normal"
         style={{
           fontSize: "clamp(5rem, 18vw, 12rem)",
+          padding: "0 0.25em",
           background: "linear-gradient(135deg,#0f172a 0%,#0891b2 42%,#0f766e 74%,#d97706 100%)",
           WebkitBackgroundClip: "text",
+          backgroundClip: "text",
           WebkitTextFillColor: "transparent",
         }}
         initial={{ opacity: 0, y: 38 }}
