@@ -553,7 +553,21 @@ export default function SystemOverviewPage() {
 
                     {activeSlide.id === 'decision' && (
                       <div className="grid flex-1 gap-4 xl:grid-cols-[390px_minmax(0,1fr)]">
-                        <section className="quadrant-transition rounded-lg border border-white/10 bg-[#005C79] p-6 text-white">
+                        {/*
+                          青蓝 #005C79 → 沧浪 #B1D5C8 的完整渐变。
+                          两色明度差 6.8 倍(0.090 vs 0.611),若线性铺满整个面板,
+                          中段会出现白字、深字都不达标的死区。故把过渡带压在
+                          54%~74% —— 实测该区间正好落在「描述块底部(53%)」与
+                          「三张小卡顶部(65%)」之间的空隙,没有文字横跨,
+                          于是形成「上深下浅」两段式:上半用白字,下半用深字。
+                        */}
+                        <section
+                          className="quadrant-transition rounded-lg border border-white/10 p-6 text-white"
+                          style={{
+                            backgroundImage:
+                              'linear-gradient(180deg, #005C79 0%, #005C79 54%, #B1D5C8 74%, #B1D5C8 100%)',
+                          }}
+                        >
                           <p className="text-sm font-bold text-[#B1D5C8]">当前象限</p>
                           <div className="mt-6 flex items-end gap-4">
                               <span className="text-7xl font-black leading-none tabular-nums">{dashboard.quadrantNumber}</span>
@@ -568,8 +582,8 @@ export default function SystemOverviewPage() {
                               ['社交', tierLabels[socialTier]],
                               ['风险', riskLabels[riskLevel]],
                             ].map(([label, value]) => (
-                              // 沧浪色小卡:底为浅青绿,故文字必须用深色(深字 12.7:1)
-                              <div key={label} className="rounded-lg bg-[#B1D5C8] p-3">
+                              // 小卡落在渐变浅端,叠白提亮后用深色字;深字在此处 11.5~15.8:1
+                              <div key={label} className="rounded-lg bg-white/45 p-3 backdrop-blur-sm">
                                 <p className="text-xs font-semibold text-slate-700">{label}</p>
                                 <p className="mt-1 text-base font-bold text-slate-950">{value}</p>
                               </div>
